@@ -4,6 +4,8 @@ import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
+import CompteList from "./CompteList";
+import TransactionList from "./TransactionList";
 
 export default function LabTabs() {
   const [value, setValue] = React.useState("1");
@@ -21,8 +23,8 @@ export default function LabTabs() {
             <Tab label="Transactions" value="2" />
           </TabList>
         </Box>
-        <TabPanel value="1">Item One</TabPanel>
-        <TabPanel value="2">Item Two</TabPanel>
+        <TabPanel value="1"><CompteList/></TabPanel>
+        <TabPanel value="2"><TransactionList/></TabPanel>
       </TabContext>
     </Box>
   );

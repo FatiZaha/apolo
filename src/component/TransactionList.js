@@ -1,4 +1,8 @@
 import * as React from "react";
+//-----------------
+import { useQuery, gql } from '@apollo/client';
+//----------
+
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
@@ -19,49 +23,28 @@ import {
   randomId,
   randomArrayItem,
 } from "@mui/x-data-grid-generator";
+import { Details } from "@mui/icons-material";
 
-const roles = ["Market", "Finance", "Development"];
+const roles = ["Type", "Montant", "CompteID"];
 const randomRole = () => {
   return randomArrayItem(roles);
 };
 
-const initialRows = [
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 25,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 36,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 19,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 28,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 23,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-];
+const GET_TRANSACTIONS = gql`
+  query {
+    allTransactions{
+      id,
+      date,
+      montant,
+      type,
+      compte{
+        id
+      }
+    }
+  }
+`;
+
+
 
 function EditToolbar(props) {
   const { setRows, setRowModesModel } = props;
@@ -88,7 +71,12 @@ function EditToolbar(props) {
 }
 
 export default function TransactionList() {
-  const [rows, setRows] = React.useState(initialRows);
+  const { loading, error, data } = useQuery(GET_TRANSACTIONS);
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error : {error.message}</p>;
+  const transactions = data?.allTransactions || [];
+
+  const [rows, setRows] = React.useState(transactions);
   const [rowModesModel, setRowModesModel] = React.useState({});
 
   const handleRowEditStop = (params, event) => {
@@ -132,30 +120,28 @@ export default function TransactionList() {
   };
 
   const columns = [
-    { field: "name", headerName: "Name", width: 180, editable: true },
+    { field: "type", headerName: "Type", width: 180, editable: false },
     {
-      field: "age",
-      headerName: "Age",
+      field: "montant",
+      headerName: "Montant",
       type: "number",
       width: 80,
       align: "left",
       headerAlign: "left",
-      editable: true,
+      editable: false,
     },
     {
-      field: "joinDate",
-      headerName: "Join date",
+      field: "date",
+      headerName: "Date",
       type: "date",
       width: 180,
-      editable: true,
+      editable: false,
     },
     {
-      field: "role",
-      headerName: "Department",
+      field: "compte",
+      headerName: "Compte ID",
       width: 220,
-      editable: true,
-      type: "singleSelect",
-      valueOptions: ["Market", "Finance", "Development"],
+      editable: false,
     },
     {
       field: "actions",
@@ -166,29 +152,10 @@ export default function TransactionList() {
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              icon={<SaveIcon />}
-              label="Save"
-              sx={{
-                color: "primary.main",
-              }}
-              onClick={handleSaveClick(id)}
-            />,
-            <GridActionsCellItem
-              icon={<CancelIcon />}
-              label="Cancel"
-              className="textPrimary"
-              onClick={handleCancelClick(id)}
-              color="inherit"
-            />,
-          ];
-        }
 
         return [
           <GridActionsCellItem
-            icon={<EditIcon />}
+            icon={<Details />}
             label="Edit"
             className="textPrimary"
             onClick={handleEditClick(id)}
